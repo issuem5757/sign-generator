@@ -1,0 +1,620 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>이메일 서명 생성기 — KD Finechem</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --bg: #f5f4f1;
+    --surface: #ffffff;
+    --surface2: #f0ede8;
+    --border: #e0dbd4;
+    --border-strong: #c8c2ba;
+    --text: #1a1a18;
+    --text-sub: #6b6760;
+    --text-hint: #9e9a95;
+    --accent: #1b3a5c;
+    --accent-light: #e8eef5;
+    --accent-hover: #142d47;
+    --success: #1a6641;
+    --success-bg: #e8f4ed;
+    --radius: 10px;
+    --radius-sm: 6px;
+    --shadow: 0 1px 3px rgba(0,0,0,0.06), 0 4px 16px rgba(0,0,0,0.04);
+    --shadow-lg: 0 2px 8px rgba(0,0,0,0.08), 0 12px 40px rgba(0,0,0,0.07);
+  }
+
+  body {
+    font-family: 'Noto Sans KR', -apple-system, BlinkMacSystemFont, sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    min-height: 100vh;
+    padding: 0 0 80px;
+  }
+
+  /* ── Header ── */
+  header {
+    background: var(--surface);
+    border-bottom: 1px solid var(--border);
+    padding: 0 40px;
+    display: flex;
+    align-items: center;
+    gap: 20px;
+    height: 64px;
+    position: sticky;
+    top: 0;
+    z-index: 100;
+    box-shadow: 0 1px 0 var(--border);
+  }
+  .header-logo {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+  .header-logo img {
+    height: 28px;
+  }
+  .header-divider {
+    width: 1px;
+    height: 20px;
+    background: var(--border-strong);
+  }
+  .header-title {
+    font-size: 14px;
+    font-weight: 500;
+    color: var(--text-sub);
+    letter-spacing: -0.01em;
+  }
+
+  /* ── Layout ── */
+  .container {
+    max-width: 1100px;
+    margin: 0 auto;
+    padding: 40px 40px 0;
+  }
+
+  .page-title {
+    font-size: 26px;
+    font-weight: 700;
+    color: var(--text);
+    letter-spacing: -0.03em;
+    margin-bottom: 4px;
+  }
+  .page-desc {
+    font-size: 14px;
+    color: var(--text-sub);
+    margin-bottom: 32px;
+    line-height: 1.6;
+  }
+
+  .layout {
+    display: grid;
+    grid-template-columns: 400px 1fr;
+    gap: 24px;
+    align-items: start;
+  }
+
+  /* ── Card ── */
+  .card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    box-shadow: var(--shadow);
+    overflow: hidden;
+  }
+  .card-header {
+    padding: 18px 24px 16px;
+    border-bottom: 1px solid var(--border);
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+  .card-icon {
+    width: 28px;
+    height: 28px;
+    border-radius: var(--radius-sm);
+    background: var(--accent-light);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 14px;
+  }
+  .card-title {
+    font-size: 14px;
+    font-weight: 700;
+    color: var(--text);
+    letter-spacing: -0.01em;
+  }
+  .card-body { padding: 20px 24px; }
+
+  /* ── Form ── */
+  .field { margin-bottom: 16px; }
+  .field:last-child { margin-bottom: 0; }
+  label {
+    display: block;
+    font-size: 12px;
+    font-weight: 500;
+    color: var(--text-sub);
+    margin-bottom: 6px;
+    letter-spacing: 0.03em;
+    text-transform: uppercase;
+  }
+  input, select {
+    width: 100%;
+    height: 40px;
+    padding: 0 12px;
+    border: 1px solid var(--border);
+    border-radius: var(--radius-sm);
+    background: var(--surface);
+    color: var(--text);
+    font-family: inherit;
+    font-size: 14px;
+    outline: none;
+    transition: border-color 0.15s, box-shadow 0.15s;
+    appearance: none;
+    -webkit-appearance: none;
+  }
+  input:focus, select:focus {
+    border-color: var(--accent);
+    box-shadow: 0 0 0 3px rgba(27,58,92,0.1);
+  }
+  input::placeholder { color: var(--text-hint); }
+
+  .phone-row { display: flex; gap: 8px; }
+  .phone-row select {
+    flex: 0 0 auto;
+    width: 120px;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%239e9a95' stroke-width='1.5' fill='none' stroke-linecap='round'/%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right 10px center;
+    padding-right: 28px;
+    cursor: pointer;
+  }
+  .phone-row input { flex: 1; min-width: 0; }
+
+  .field-hint {
+    font-size: 11px;
+    color: var(--text-hint);
+    margin-top: 5px;
+  }
+
+  .field-row { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+
+  /* ── Preview ── */
+  .preview-wrap {
+    background: var(--surface2);
+    border-radius: var(--radius-sm);
+    padding: 20px;
+    margin-bottom: 20px;
+    display: flex;
+    justify-content: center;
+    overflow: hidden;
+  }
+  .preview-scale {
+    transform: scale(0.9);
+    transform-origin: center top;
+    width: 700px;
+    height: 150px;
+    flex-shrink: 0;
+  }
+  .preview-container {
+    overflow: hidden;
+    height: 136px;
+  }
+
+  /* ── Code output ── */
+  .code-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 10px;
+  }
+  .code-label {
+    font-size: 12px;
+    font-weight: 700;
+    color: var(--text-sub);
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+  }
+  .copy-btn {
+    height: 34px;
+    padding: 0 14px;
+    border: 1px solid var(--border-strong);
+    border-radius: var(--radius-sm);
+    background: var(--surface);
+    color: var(--text);
+    font-family: inherit;
+    font-size: 13px;
+    font-weight: 500;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    transition: all 0.15s;
+  }
+  .copy-btn:hover { background: var(--surface2); border-color: var(--accent); color: var(--accent); }
+  .copy-btn.copied { background: var(--success-bg); border-color: var(--success); color: var(--success); }
+
+  .code-block {
+    background: #1e1e1e;
+    color: #d4d4d4;
+    border-radius: var(--radius-sm);
+    padding: 16px;
+    font-family: 'Cascadia Code', 'Fira Code', 'Consolas', monospace;
+    font-size: 11.5px;
+    line-height: 1.7;
+    overflow: auto;
+    max-height: 220px;
+    white-space: pre;
+    border: 1px solid rgba(255,255,255,0.05);
+  }
+
+  /* ── Guide ── */
+  .guide { margin-top: 24px; }
+  .guide-title {
+    font-size: 13px;
+    font-weight: 700;
+    color: var(--text-sub);
+    margin-bottom: 12px;
+    letter-spacing: 0.02em;
+  }
+  .steps {
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr;
+    gap: 12px;
+  }
+  .step {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-sm);
+    padding: 14px 16px;
+  }
+  .step-num {
+    display: inline-flex;
+    width: 22px;
+    height: 22px;
+    border-radius: 50%;
+    background: var(--accent);
+    color: #fff;
+    font-size: 11px;
+    font-weight: 700;
+    align-items: center;
+    justify-content: center;
+    margin-bottom: 8px;
+  }
+  .step-text {
+    font-size: 12.5px;
+    color: var(--text-sub);
+    line-height: 1.6;
+  }
+  .step-text strong { color: var(--text); font-weight: 500; }
+
+  /* ── Footer ── */
+  .page-footer {
+    text-align: center;
+    margin-top: 48px;
+    padding-top: 24px;
+    border-top: 1px solid var(--border);
+    font-size: 12px;
+    color: var(--text-hint);
+  }
+
+  @media (max-width: 900px) {
+    .container { padding: 24px 20px 0; }
+    .layout { grid-template-columns: 1fr; }
+    .field-row { grid-template-columns: 1fr; }
+    .steps { grid-template-columns: 1fr; }
+    header { padding: 0 20px; }
+    .preview-scale { transform: scale(0.75); }
+    .preview-container { height: 115px; }
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="header-logo">
+    <img src="http://www.kdfinechem.com/images/mailform/kd-logo.png" alt="KD Finechem" onerror="this.style.display='none'">
+    <div class="header-divider"></div>
+    <span class="header-title">이메일 서명 생성기</span>
+  </div>
+</header>
+
+<div class="container">
+  <h1 class="page-title">이메일 서명 생성기</h1>
+  <p class="page-desc">정보를 입력하면 서명 HTML 코드가 자동으로 생성됩니다. 코드를 복사해 이메일 클라이언트의 서명 설정에 붙여넣으세요.</p>
+
+  <div class="layout">
+
+    <!-- 왼쪽: 입력 폼 -->
+    <div class="card">
+      <div class="card-header">
+        <div class="card-icon">✏️</div>
+        <span class="card-title">개인 정보 입력</span>
+      </div>
+      <div class="card-body">
+
+        <div class="field-row">
+          <div class="field">
+            <label>영문 이름</label>
+            <input id="nameEn" type="text" placeholder="Hong Gildong" oninput="render()">
+          </div>
+          <div class="field">
+            <label>한국어 이름</label>
+            <input id="nameKo" type="text" placeholder="홍길동" oninput="render()">
+          </div>
+        </div>
+
+        <div class="field">
+          <label>소속 (팀명)</label>
+          <input id="team" type="text" placeholder="연구지원팀 / Research Support Team" oninput="render()">
+        </div>
+
+        <div class="field">
+          <label>휴대폰 번호</label>
+          <div class="phone-row">
+            <select id="mobileCode" onchange="render()">
+              <option value="82">🇰🇷 +82</option>
+              <option value="1">🇺🇸 +1</option>
+              <option value="81">🇯🇵 +81</option>
+              <option value="86">🇨🇳 +86</option>
+              <option value="44">🇬🇧 +44</option>
+              <option value="49">🇩🇪 +49</option>
+              <option value="33">🇫🇷 +33</option>
+              <option value="65">🇸🇬 +65</option>
+              <option value="61">🇦🇺 +61</option>
+              <option value="84">🇻🇳 +84</option>
+              <option value="60">🇲🇾 +60</option>
+              <option value="66">🇹🇭 +66</option>
+              <option value="91">🇮🇳 +91</option>
+              <option value="971">🇦🇪 +971</option>
+              <option value="966">🇸🇦 +966</option>
+              <option value="55">🇧🇷 +55</option>
+              <option value="7">🇷🇺 +7</option>
+            </select>
+            <input id="mobile" type="tel" placeholder="010-1234-5678" oninput="render()">
+          </div>
+          <p class="field-hint">국가번호 선택 시 앞자리 0은 자동으로 제거됩니다 (국제 표준)</p>
+        </div>
+
+        <div class="field">
+          <label>직통 번호</label>
+          <div class="phone-row">
+            <select id="directCode" onchange="render()">
+              <option value="82">🇰🇷 +82</option>
+              <option value="1">🇺🇸 +1</option>
+              <option value="81">🇯🇵 +81</option>
+              <option value="86">🇨🇳 +86</option>
+              <option value="44">🇬🇧 +44</option>
+              <option value="49">🇩🇪 +49</option>
+              <option value="33">🇫🇷 +33</option>
+              <option value="65">🇸🇬 +65</option>
+              <option value="61">🇦🇺 +61</option>
+              <option value="84">🇻🇳 +84</option>
+              <option value="60">🇲🇾 +60</option>
+              <option value="66">🇹🇭 +66</option>
+              <option value="91">🇮🇳 +91</option>
+              <option value="971">🇦🇪 +971</option>
+              <option value="966">🇸🇦 +966</option>
+              <option value="55">🇧🇷 +55</option>
+              <option value="7">🇷🇺 +7</option>
+            </select>
+            <input id="direct" type="tel" placeholder="070-1234-5678" oninput="render()">
+          </div>
+          <p class="field-hint">직통전화, 구내전화, 대표번호 등</p>
+        </div>
+
+      </div>
+    </div>
+
+    <!-- 오른쪽: 미리보기 + 코드 -->
+    <div>
+      <div class="card" style="margin-bottom: 20px;">
+        <div class="card-header">
+          <div class="card-icon">👁</div>
+          <span class="card-title">미리보기</span>
+        </div>
+        <div class="card-body">
+          <div class="preview-wrap">
+            <div class="preview-container">
+              <div id="preview" class="preview-scale"></div>
+            </div>
+          </div>
+          <p style="font-size:12px;color:var(--text-hint);text-align:center;">실제 이메일 클라이언트에서의 표시와 약간 다를 수 있습니다</p>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-header">
+          <div class="card-icon">📋</div>
+          <span class="card-title">생성된 HTML 코드</span>
+        </div>
+        <div class="card-body">
+          <div class="code-header">
+            <span class="code-label">HTML</span>
+            <button class="copy-btn" id="copyBtn" onclick="copyHtml()">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect>
+                <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path>
+              </svg>
+              <span id="copyLabel">코드 복사</span>
+            </button>
+          </div>
+          <pre id="codeBlock" class="code-block"></pre>
+        </div>
+      </div>
+
+      <div class="guide">
+        <p class="guide-title">이메일 서명 적용 방법</p>
+        <div class="steps">
+          <div class="step">
+            <div class="step-num">1</div>
+            <p class="step-text"><strong>Outlook</strong><br>파일 → 옵션 → 메일 → 서명 → 새로 만들기 → 서명 편집 영역에서 HTML 보기(소스) 모드로 전환 후 붙여넣기</p>
+          </div>
+          <div class="step">
+            <div class="step-num">2</div>
+            <p class="step-text"><strong>Gmail</strong><br>설정(⚙️) → 모든 설정 보기 → 서명 → 새 서명 → 편집기에서 붙여넣기 (서식 유지 필요)</p>
+          </div>
+          <div class="step">
+            <div class="step-num">3</div>
+            <p class="step-text"><strong>기타 클라이언트</strong><br>서명 설정에서 HTML 편집기(소스 편집) 모드를 찾아 코드를 직접 붙여넣기</p>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <div class="page-footer">
+    KD Finechem 이메일 서명 생성기 &nbsp;·&nbsp; 입력 정보는 서버에 저장되지 않습니다
+  </div>
+</div>
+
+<script>
+  // ── 전화번호 국제형식 변환 알고리즘 ──────────────────────────
+  // 규칙: 숫자만 추출 → 맨 앞 0이 있으면 제거 (국제전화 trunk prefix)
+  // 예) 82 + "010-1234-5678" → digits="0101234578" → "101234578" → tel:"+820101234578"
+  // 표시: "(+82) 010-1234-5678" 그대로 표시
+  function toTelHref(countryCode, number) {
+    var digits = number.replace(/\D/g, '');   // 숫자만 추출
+    if (digits.charAt(0) === '0') {           // 앞자리 0이면 제거 (trunk prefix)
+      digits = digits.substring(1);
+    }
+    return '+' + countryCode + digits;
+  }
+
+  function toDisplay(countryCode, number) {
+    return '(+' + countryCode + ') ' + number;
+  }
+
+  // ── HTML 생성 ────────────────────────────────────────────────
+  function generateHtml() {
+    var nameEn     = document.getElementById('nameEn').value   || 'NAME';
+    var nameKo     = document.getElementById('nameKo').value   || '이름';
+    var team       = document.getElementById('team').value     || 'TEAM NAME';
+    var mobileCode = document.getElementById('mobileCode').value;
+    var mobile     = document.getElementById('mobile').value   || '010-1234-1234';
+    var directCode = document.getElementById('directCode').value;
+    var direct     = document.getElementById('direct').value   || '70-1234-1234';
+
+    var mobileDisplay = toDisplay(mobileCode, mobile);
+    var directDisplay = toDisplay(directCode, direct);
+    var mobileTel     = toTelHref(mobileCode, mobile);
+    var directTel     = toTelHref(directCode, direct);
+
+    return [
+      '<div style="width:700px;height:150px;position:relative;overflow:hidden;background:url(\'http://www.kdfinechem.com/images/mailform/wave-bg.jpg\') no-repeat;font-family:Arial,Helvetica,sans-serif;box-sizing:border-box;border:1px solid #e7e7e7;">',
+      ' ',
+      '    <!-- 좌측 영역 -->',
+      '    <div style="position:absolute;left:40px;top:24px;z-index:2;">',
+      ' ',
+      '        <div style="margin:0;font-size:30px;font-weight:700;color:#1b1b1b;letter-spacing:-1px;line-height:1;">',
+      '            ' + nameEn,
+      '            <span style="font-size:13px;font-weight:700;margin-left:6px;letter-spacing:0.5px;">',
+      '                (' + nameKo + ')',
+      '            </span>',
+      '        </div>',
+      ' ',
+      '        <div style="margin-top:6px;font-size:9px;color:#222;">',
+      '            ' + team,
+      '        </div>',
+      ' ',
+      '        <div style="margin-top:20px;font-size:13px;font-weight:700;color:#1b1b1b;line-height:1.8;">',
+      ' ',
+      '            <div style="display:flex;align-items:center;gap:5px;">',
+      '                <a href="tel:' + mobileTel + '" style="text-decoration:none;color:#151515;">',
+      '<span style="width:14px;display:inline-block;"><img src="http://www.kdfinechem.com/images/mailform/icon-phone.png" alt="휴대폰" style="vertical-align:middle;"></span>',
+      '                <span>' + mobileDisplay + '</span>',
+      '</a>',
+      '            </div>',
+      ' ',
+      '            <div style="display:flex;align-items:center;gap:5px;">',
+      '                <a href="tel:' + directTel + '" style="text-decoration:none;color:#151515;">',
+      '<span style="width:14px;display:inline-block;"><img src="http://www.kdfinechem.com/images/mailform/icon-tel.png" alt="전화" style="vertical-align:middle;"></span>',
+      '                <span>' + directDisplay + '</span>',
+      '</a>',
+      '            </div>',
+      ' ',
+      '        </div>',
+      '    </div>',
+      ' ',
+      ' ',
+      '    <!-- 우측 로고 -->',
+      '    <div style="position:absolute;right:32px;top:20px;text-align:left;z-index:2;">',
+      '        <div style="display:block;align-items:center;gap:6px;">',
+      '           <img src="http://www.kdfinechem.com/images/mailform/kd-logo.png" alt="KD Finechem">',
+      '  <p style="font-size:10.8px;font-weight:500;letter-spacing:-0.2px;padding-left:3px;margin-top:5px;">2024 National Quality Award Winner</p>',
+      '        </div>',
+      '    </div>',
+      ' ',
+      '    <!-- SNS -->',
+      '    <div style="position:absolute;right:42px;bottom:16px;display:flex;gap:18px;z-index:3;">',
+      '        <a href="https://www.instagram.com/kdfinechem_official/" target="_blank">',
+      '            <img src="http://www.kdfinechem.com/images/mailform/sns-instagram.png" alt="인스타그램">',
+      '        </a>',
+      '        <a href="https://www.linkedin.com/company/102743931/admin/dashboard/" target="_blank">',
+      '           <img src="http://www.kdfinechem.com/images/mailform/sns-linkedin.png" alt="링크드인">',
+      '        </a>',
+      '        <a href="http://www.kdfinechem.com/en" target="_blank">',
+      '            <img src="http://www.kdfinechem.com/images/mailform/sns-website.png" alt="웹사이트">',
+      '        </a>',
+      '    </div>',
+      ' ',
+      '</div>'
+    ].join('\n');
+  }
+
+  // ── 렌더링 ───────────────────────────────────────────────────
+  function render() {
+    var html = generateHtml();
+    document.getElementById('preview').innerHTML = html;
+    document.getElementById('codeBlock').textContent = html;
+  }
+
+  // ── 복사 ─────────────────────────────────────────────────────
+  function copyHtml() {
+    var html = generateHtml();
+    var btn = document.getElementById('copyBtn');
+    var lbl = document.getElementById('copyLabel');
+
+    if (navigator.clipboard && navigator.clipboard.writeText) {
+      navigator.clipboard.writeText(html).then(function () {
+        showCopied(btn, lbl);
+      }).catch(function () {
+        fallbackCopy(html, btn, lbl);
+      });
+    } else {
+      fallbackCopy(html, btn, lbl);
+    }
+  }
+
+  function fallbackCopy(text, btn, lbl) {
+    var ta = document.createElement('textarea');
+    ta.value = text;
+    ta.style.position = 'fixed';
+    ta.style.opacity = '0';
+    document.body.appendChild(ta);
+    ta.select();
+    try { document.execCommand('copy'); showCopied(btn, lbl); } catch(e) {}
+    document.body.removeChild(ta);
+  }
+
+  function showCopied(btn, lbl) {
+    lbl.textContent = '복사됨 ✓';
+    btn.classList.add('copied');
+    setTimeout(function () {
+      lbl.textContent = '코드 복사';
+      btn.classList.remove('copied');
+    }, 2500);
+  }
+
+  // ── 초기 렌더링 ──────────────────────────────────────────────
+  render();
+</script>
+</body>
+</html>
